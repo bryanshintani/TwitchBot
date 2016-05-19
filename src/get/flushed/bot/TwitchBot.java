@@ -3,7 +3,7 @@ package get.flushed.bot;
 import org.jibble.pircbot.*;
 
 public class TwitchBot extends PircBot {
-	
+
 	WeaponList weapon = new WeaponList();
 	Maps map = new Maps();
 	Modes mode = new Modes();

@@ -7,74 +7,59 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Schedule {
-	
+
 	private static String result = "";
 	private static JSONObject obj = null;
-	
+
 	public Schedule() {
-			
-		}
-	
+
+	}
+
 	public void urlData() {
 		try {
 			URL url = new URL("http://splatapi.ovh/schedule_na.json");
 			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", "Mozilla/5.0");
 			InputStream in = conn.getInputStream();
-			
+
 			BufferedReader br = new BufferedReader(
-					new InputStreamReader(in, "utf-8"), 8);
+				new InputStreamReader(in, "utf-8"), 8);
 			StringBuilder sb = new StringBuilder();
 			String line = null;
 			while((line = br.readLine()) != null) {
 				sb.append(line);
 			}
-			
+
 			result = sb.toString();
 			obj = new JSONObject(result);
 		} catch(Exception e) {
-			
+
 		}
 	}
 
-	public String getRankedModes() {
-		String modes = "";
-		try {
-		JSONArray arr = obj.getJSONArray("schedule");
-		for(int i = 0; i < arr.length(); i++) {
-			modes = arr.getJSONObject(i).getString("ranked_modeEN");
-		}
-		} catch(Exception e) {
-		
-		}
-		return modes;
-	}
-	
 	public String getRankedMaps() {
-		String maps = "";
-		try {
-		JSONArray arr = obj.getJSONArray("schedule");
 		
-		for(int i = 0; i < arr.length(); i++) {
-			//grab 0 instead of i to grab first index of array.
-			//try to grab and print ranked mode, ranked maps, regular maps
-			//and beginning and ending times.
-			JSONArray stages = arr.getJSONObject(i).getJSONArray("stages");
-			for(int j = 0; j < stages.length(); j++) {
-				if(j < 2) {
-				maps += stages.getJSONObject(j).getString("nameEN") + ", ";
+		String modes = "";
+		String begin = "";
+		String end = "";
+
+		try{
+			JSONArray schedule = obj.getJSONArray("schedule");
+
+			for(int i = 0; i < schedule.length(); i++) {
+				if(i < 2) {
+					modes += schedule.getJSONObject(i).getString("ranked_modeEN") + ", ";
+					begin += " " + schedule.getJSONObject(i).getString("begin") + ", ";
+					end += " " + schedule.getJSONObject(i).getString("end") + ", ";
 				} else {
-					maps += stages.getJSONObject(j).getString("nameEN") + ". ";
+					modes += schedule.getJSONObject(i).getString("ranked_modeEN") + ".";
+					begin += " " + schedule.getJSONObject(i).getString("begin") + ". ";
+					end += " " + schedule.getJSONObject(i).getString("end") + ", ";
 				}
 			}
-		}
 		} catch(Exception e) {
 
 		}
-		return maps;
+		return modes + begin + end;
 	}
-	
-	/*public JSONArray getSched() {
-		return obj.getJSONArray("schedule");
-	}*/
 }
