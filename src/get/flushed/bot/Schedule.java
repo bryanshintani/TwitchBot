@@ -37,9 +37,11 @@ public class Schedule {
 		}
 	}
 
-	public String getRankedMaps() {
+	public String getSchedule() {
 		
 		String message = "";
+		String rankedMsg = "";
+		String regularMsg= "";
 
 		try{
 			JSONArray schedule = obj.getJSONArray("schedule");
@@ -49,12 +51,29 @@ public class Schedule {
 				JSONObject stages = schedule.getJSONObject(0).getJSONObject("stages");
 				JSONArray regularMaps = stages.getJSONArray("regular");
 				JSONArray rankedMaps = stages.getJSONArray("ranked");
+				for(int k = 0; k <regularMaps.length(); k ++){
+					if(k < regularMaps.length()-1) {
+						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + " & ";
+					} else {
+						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + ". ";
+					}
+				}
+				for(int j = 0; j < rankedMaps.length(); j++){
+					if(j < rankedMaps.length()-1) {
+						rankedMsg += rankedMaps.getJSONObject(j).getString("nameEN") + " & ";
+					} else {
+						rankedMsg += rankedMaps.getJSONObject(j).getString("nameEN") + ". ";
+					}
+				}
 				message = "Current Rotation: " 
-						+ schedule.getJSONObject(0).getString("ranked_modeEN") + ". ";
-					
+						+ schedule.getJSONObject(0).getString("ranked_modeEN") + " on "
+						+ rankedMsg + " Turf War on " + regularMsg;
+				//TODO Change time format to display in how many hours/minutes the next rotations start.
 				for(int i = 1; i < length; i++) {
-					message += schedule.getJSONObject(i).getString("ranked_modeEN") + " starts at "	
-							+ schedule.getJSONObject(i).getString("begin") + "... ";
+					message += "[" + schedule.getJSONObject(i).getString("begin") + "] "
+							+ schedule.getJSONObject(i).getString("ranked_modeEN") + " on "
+							+rankedMsg + " Turf War on " + regularMsg;
+						
 				}
 			}
 		} catch(Exception e) {
