@@ -33,11 +33,9 @@ public class TwitchBot extends PircBot {
 		// and have int variable dictate number of iterations.
 		} else if(message.equalsIgnoreCase("!stages 5")) {
 			for(int i = 0; i < 5; i++) {
-		
 				sendMessage(channel, mode.getMode() + " ∴ " + map.getMap());
 			}
 		} else if(message.equalsIgnoreCase("!schedule")) {
-
 			sendMessage(channel, schedule.getSchedule());
 		}
 	}

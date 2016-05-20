@@ -68,7 +68,7 @@ public class Schedule {
 				message = "Current Rotation: " 
 						+ schedule.getJSONObject(0).getString("ranked_modeEN") + " on "
 						+ rankedMsg + " Turf War on " + regularMsg;
-				//TODO Change time format to display in how many hours/minutes the next rotations start.
+				//TODO Change time format to display in how many hours/minutes the next rotations start
 				for(int i = 1; i < length; i++) {
 					message += "[" + schedule.getJSONObject(i).getString("begin") + "] "
 							+ schedule.getJSONObject(i).getString("ranked_modeEN") + " on "
