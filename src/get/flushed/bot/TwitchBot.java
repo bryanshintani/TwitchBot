@@ -38,7 +38,7 @@ public class TwitchBot extends PircBot {
 			}
 		} else if(message.equalsIgnoreCase("!schedule")) {
 
-			sendMessage(channel, schedule.getRankedMaps());
+			sendMessage(channel, schedule.getSchedule());
 		}
 	}
 }
