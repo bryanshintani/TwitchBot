@@ -39,27 +39,27 @@ public class Schedule {
 
 	public String getRankedMaps() {
 		
-		String modes = "";
-		String begin = "";
-		String end = "";
+		String message = "";
 
 		try{
 			JSONArray schedule = obj.getJSONArray("schedule");
-
-			for(int i = 0; i < schedule.length(); i++) {
-				if(i < 2) {
-					modes += schedule.getJSONObject(i).getString("ranked_modeEN") + ", ";
-					begin += " " + schedule.getJSONObject(i).getString("begin") + ", ";
-					end += " " + schedule.getJSONObject(i).getString("end") + ", ";
-				} else {
-					modes += schedule.getJSONObject(i).getString("ranked_modeEN") + ".";
-					begin += " " + schedule.getJSONObject(i).getString("begin") + ". ";
-					end += " " + schedule.getJSONObject(i).getString("end") + ", ";
+			
+			int length = schedule.length();
+			if(length > 0) {
+				JSONObject stages = schedule.getJSONObject(0).getJSONObject("stages");
+				JSONArray regularMaps = stages.getJSONArray("regular");
+				JSONArray rankedMaps = stages.getJSONArray("ranked");
+				message = "Current Rotation: " 
+						+ schedule.getJSONObject(0).getString("ranked_modeEN") + ". ";
+					
+				for(int i = 1; i < length; i++) {
+					message += schedule.getJSONObject(i).getString("ranked_modeEN") + " starts at "	
+							+ schedule.getJSONObject(i).getString("begin") + "... ";
 				}
 			}
 		} catch(Exception e) {
 
 		}
-		return modes + begin + end;
+		return message;
 	}
 }
