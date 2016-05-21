@@ -3,6 +3,9 @@ package get.flushed.bot;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,66 +42,54 @@ public class Schedule {
 
 	public String getSchedule() {
 		
-		String message = "";
-		String rankedMsg = "";
-		String regularMsg= "";
+		String result = "";
+		DateTime currTime = new DateTime(DateTimeZone.UTC);
 
 		try{
 			JSONArray schedule = obj.getJSONArray("schedule");
-			
-			int length = schedule.length();
-			if(length > 0) {
-				JSONObject stages = schedule.getJSONObject(0).getJSONObject("stages");
-				/* stages is only grabbing the first (0) object in schedule
-				 * rankedMsg and regularMsg are always set to the respective
-				 * values in (0) of schedule.*/
-				 
-				JSONArray regularMaps = stages.getJSONArray("regular");
-				JSONArray rankedMaps = stages.getJSONArray("ranked");
-				for(int k = 0; k <regularMaps.length(); k++){
-					if(k < regularMaps.length()-1) {
-						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + " & ";
-					} else {
-						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + ". ";
-					}
-				}
-				for(int j = 0; j < rankedMaps.length(); j++){
-					if(j < rankedMaps.length()-1) {
-						rankedMsg += rankedMaps.getJSONObject(j).getString("nameEN") + " & ";
-					} else {
-						rankedMsg += rankedMaps.getJSONObject(j).getString("nameEN") + ". ";
-					}
-				}
-				message = "Current Rotation: " 
-						+ schedule.getJSONObject(0).getString("ranked_modeEN") + " on "
-						+ rankedMsg + " Turf War on " + regularMsg;
-				//TODO Change time format to display in how many hours/minutes the next rotations start
+			int scheduleLength = schedule.length();
+			for (int i = 0; i < scheduleLength; i++) {
+				JSONObject rotation = schedule.getJSONObject(i);
+				String mode = rotation.getString("ranked_modeEN");
+				String beginTime = rotation.getString("begin");
+				JSONObject stages = rotation.getJSONObject("stages");
 				
-				for(int i = 1; i < length; i++) {
-					String time = schedule.getJSONObject(i).getString("begin");
-					String nextTime = "";
-					//temporary "time" place holder.
-					if(time.contains("T07")) {
-						nextTime = "3:00PM PDT";
-					} else if(time.contains("T11")) {
-						nextTime = "7:00PM PDT";
-					} else if(time.contains("T15")) {
-						nextTime = "11:00PM PDT";
-					} else if(time.contains("T19")) {
-						nextTime = "3:00AM PDT";
-					} else if(time.contains("T23")) {
-						nextTime = "7:00AM PDT";
-					} else if(time.contains("T03")) {
-						nextTime = "11:00AM PDT";
+				JSONArray rankedMaps = stages.getJSONArray("ranked");
+				JSONArray regularMaps = stages.getJSONArray("regular");
+				int mapsLength = rankedMaps.length(); //assume rankedMaps.length() == regularMaps.length()
+				
+				String rankedMapsMsg = "";
+				String regularMapsMsg = "";
+				
+				for(int j = 0; j < mapsLength; j++) {
+					
+					rankedMapsMsg += rankedMaps.getJSONObject(j).getString("nameEN");
+					regularMapsMsg += regularMaps.getJSONObject(j).getString("nameEN");
+					if (j == mapsLength - 1) { //last object in rankedMaps
+						 rankedMapsMsg += ". ";
+						 regularMapsMsg += ". ";
+					} else {
+						rankedMapsMsg += " & ";
+						regularMapsMsg += " & ";
 					}
-					message += "[" + nextTime + "] "
-							+ schedule.getJSONObject(i).getString("ranked_modeEN") + " on "
-							+ rankedMsg + " Turf War on " + regularMsg;
+				}
+				
+				boolean isCurrentRotation = i == 0;
+				String modeMapsMsg = mode + " on " + rankedMapsMsg + "Turf War on " + regularMapsMsg;
+				if (isCurrentRotation) {
+					result += "[Current Rotation] " + modeMapsMsg;
+				}else {
+					DateTime dt = new DateTime(beginTime, DateTimeZone.UTC);
+					int minDiff = dt.getMinuteOfDay() - currTime.getMinuteOfDay();
+					int hours = minDiff / 60;
+					int minutes = minDiff % 60;
+					result += "[" + hours + "h"+" " + minutes + "m" + "] " + modeMapsMsg;
 				}
 			}
+			
 		} catch(Exception e) {
-
+			System.out.println(e.getMessage());
 		}
-		return message;
+		return result;
 	}
 }
