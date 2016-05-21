@@ -3,6 +3,9 @@ package get.flushed.bot;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -12,7 +15,7 @@ public class Schedule {
 	private static JSONObject obj = null;
 
 	public Schedule() {
-
+		System.currentTimeMillis();
 	}
 
 	public void urlData() {
@@ -39,46 +42,54 @@ public class Schedule {
 
 	public String getSchedule() {
 		
-		String message = "";
-		String rankedMsg = "";
-		String regularMsg= "";
+		String result = "";
+		DateTime currTime = new DateTime(DateTimeZone.UTC);
 
 		try{
 			JSONArray schedule = obj.getJSONArray("schedule");
-			
-			int length = schedule.length();
-			if(length > 0) {
-				JSONObject stages = schedule.getJSONObject(0).getJSONObject("stages");
-				JSONArray regularMaps = stages.getJSONArray("regular");
+			int scheduleLength = schedule.length();
+			for (int i = 0; i < scheduleLength; i++) {
+				JSONObject rotation = schedule.getJSONObject(i);
+				String mode = rotation.getString("ranked_modeEN");
+				String beginTime = rotation.getString("begin");
+				JSONObject stages = rotation.getJSONObject("stages");
+				
 				JSONArray rankedMaps = stages.getJSONArray("ranked");
-				for(int k = 0; k <regularMaps.length(); k ++){
-					if(k < regularMaps.length()-1) {
-						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + " & ";
+				JSONArray regularMaps = stages.getJSONArray("regular");
+				int mapsLength = rankedMaps.length(); //assume rankedMaps.length() == regularMaps.length()
+				
+				String rankedMapsMsg = "";
+				String regularMapsMsg = "";
+				
+				for(int j = 0; j < mapsLength; j++) {
+					
+					rankedMapsMsg += rankedMaps.getJSONObject(j).getString("nameEN");
+					regularMapsMsg += regularMaps.getJSONObject(j).getString("nameEN");
+					if (j == mapsLength - 1) { //last object in rankedMaps
+						 rankedMapsMsg += ". ";
+						 regularMapsMsg += ". ";
 					} else {
-						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + ". ";
+						rankedMapsMsg += " & ";
+						regularMapsMsg += " & ";
 					}
 				}
-				for(int j = 0; j < rankedMaps.length(); j++){
-					if(j < rankedMaps.length()-1) {
-						rankedMsg += rankedMaps.getJSONObject(j).getString("nameEN") + " & ";
-					} else {
-						rankedMsg += rankedMaps.getJSONObject(j).getString("nameEN") + ". ";
-					}
-				}
-				message = "Current Rotation: " 
-						+ schedule.getJSONObject(0).getString("ranked_modeEN") + " on "
-						+ rankedMsg + " Turf War on " + regularMsg;
-				//TODO Change time format to display in how many hours/minutes the next rotations start
-				for(int i = 1; i < length; i++) {
-					message += "[" + schedule.getJSONObject(i).getString("begin") + "] "
-							+ schedule.getJSONObject(i).getString("ranked_modeEN") + " on "
-							+rankedMsg + " Turf War on " + regularMsg;
-						
+				
+				boolean isCurrentRotation = i == 0;
+				String modeMapsMsg = mode + " on " + rankedMapsMsg + "Turf War on " + regularMapsMsg;
+				if (isCurrentRotation) {
+					result += "[Current Rotation] " + modeMapsMsg;
+				}else {
+					DateTime dt = new DateTime(beginTime, DateTimeZone.UTC);
+					int minDiff = dt.getMinuteOfDay() - currTime.getMinuteOfDay();
+					int hours = minDiff / 60;
+					int minutes = minDiff % 60;
+					result += "[" + hours + "h"+" " + minutes + "m" + "] " + modeMapsMsg;
 				}
 			}
+			
 		} catch(Exception e) {
-
+			System.out.println(e.getMessage());
 		}
-		return message;
+		return result;
 	}
 }
