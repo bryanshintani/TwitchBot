@@ -12,7 +12,7 @@ public class Schedule {
 	private static JSONObject obj = null;
 
 	public Schedule() {
-
+		System.currentTimeMillis();
 	}
 
 	public void urlData() {
@@ -49,9 +49,13 @@ public class Schedule {
 			int length = schedule.length();
 			if(length > 0) {
 				JSONObject stages = schedule.getJSONObject(0).getJSONObject("stages");
+				/* stages is only grabbing the first (0) object in schedule
+				 * rankedMsg and regularMsg are always set to the respective
+				 * values in (0) of schedule.*/
+				 
 				JSONArray regularMaps = stages.getJSONArray("regular");
 				JSONArray rankedMaps = stages.getJSONArray("ranked");
-				for(int k = 0; k <regularMaps.length(); k ++){
+				for(int k = 0; k <regularMaps.length(); k++){
 					if(k < regularMaps.length()-1) {
 						regularMsg += regularMaps.getJSONObject(k).getString("nameEN") + " & ";
 					} else {
@@ -69,11 +73,27 @@ public class Schedule {
 						+ schedule.getJSONObject(0).getString("ranked_modeEN") + " on "
 						+ rankedMsg + " Turf War on " + regularMsg;
 				//TODO Change time format to display in how many hours/minutes the next rotations start
+				
 				for(int i = 1; i < length; i++) {
-					message += "[" + schedule.getJSONObject(i).getString("begin") + "] "
+					String time = schedule.getJSONObject(i).getString("begin");
+					String nextTime = "";
+					//temporary "time" place holder.
+					if(time.contains("T07")) {
+						nextTime = "3:00PM PDT";
+					} else if(time.contains("T11")) {
+						nextTime = "7:00PM PDT";
+					} else if(time.contains("T15")) {
+						nextTime = "11:00PM PDT";
+					} else if(time.contains("T19")) {
+						nextTime = "3:00AM PDT";
+					} else if(time.contains("T23")) {
+						nextTime = "7:00AM PDT";
+					} else if(time.contains("T03")) {
+						nextTime = "11:00AM PDT";
+					}
+					message += "[" + nextTime + "] "
 							+ schedule.getJSONObject(i).getString("ranked_modeEN") + " on "
-							+rankedMsg + " Turf War on " + regularMsg;
-						
+							+ rankedMsg + " Turf War on " + regularMsg;
 				}
 			}
 		} catch(Exception e) {
